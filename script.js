@@ -84,19 +84,73 @@ const items = [{
     },
 ];
 
+const containerItems = document.querySelector("#shop-items");
+const templateItems = document.querySelector("#item-template");
+const nothingFound = document.querySelector("#nothing-found");
 
+function prepareItems(shopItems) {
+    const { title, description, tags, price, img } = shopItems;
+    const item = templateItems.content.cloneNode(true);
 
+    item.querySelector("h1").textContent = title;
+    item.querySelector("p").textContent = description;
+    item.querySelector(".price").textContent = price;
+    item.querySelector("img").src = img;
 
+    const tagsHolder = item.querySelector(".tags")
 
-const template = document.querySelector('#item-templat');
-const clone = template.content.cloneNode(true);
-clone.querySelector('h1').textContent = items.title;
-clone.querySelector('p').textContent = items.description;
-clone.querySelector('span.price').textContent = items.price;
-clone.querySelector('img').textContent = items.img;
-clone.querySelector('div.tags').textContent = items.tags;
-const container = document.querySelector('#shop-items');
-container.prepend(clone);
+    tags.forEach((tag) => {
+        const element = document.createElement("span");
+        element.textContent = tags;
+        element.classList.add("tag");
+        tagsHolder.append(element);
+    });
+    return item;
+}
 
+let currentState = [...items];
 
-//если честно, мне вообще эта тема не понравиась и я ее не поняла. может нужно создать функцию, перебрать элементы массива и поприсваивать им значения из шаблона? я не понимаю ка кэто сделать
+function renderItems(arr) {
+    nothingFound.textContent = "";
+    containerItems.innerHTML = "";
+    arr.forEach((item) => {
+        containerItems.append(prepareItems(item));
+    })
+
+    if (arr.lenght == 0) {
+        nothingFound.textContent = "Ничего не найдено";
+    }
+}
+
+renderItems(currentState);
+
+function sortByAlphabet(a, b) {
+    if (a > b) {
+        return 3;
+    }
+
+    if (a < b) {
+        return -3;
+    }
+
+    if (a == b) {
+        return 0;
+    }
+}
+
+renderItems(currentState.sort((a, b) => sortByAlphabet(a.title, b.title)));
+
+const buttonSearch = document.querySelector("#search-btn");
+const inputSearch = document.querySelector("#search-input");
+
+function applySearch() {
+    const searchString = inputSearch.value.trim().toLowerCase();
+
+    currentState = items.filter((el) =>
+        el.title.toLowerCase().includes(searchString)
+    );
+    renderItems(currentState);
+}
+
+buttonSearch.addEventListener('click', applySearch);
+inputSearch.addEventListener('click', applySearch);
